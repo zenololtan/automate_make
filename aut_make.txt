@@ -1,0 +1,40 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         ::::::::             #
+#    aut_make.txt                                       :+:    :+:             #
+#                                                      +:+                     #
+#    By: ztan <ztan@student.codam.nl>                 +#+                      #
+#                                                    +#+                       #
+#    Created: 2021/05/17 14:22:47 by ztan          #+#    #+#                  #
+#    Updated: 2021/05/17 14:54:23 by ztan          ########   odam.nl          #
+#                                                                              #
+# **************************************************************************** #
+
+input
+ - name
+ - not included dirs
+
+makes
+ - variable for all documents excluding "inc" <<<<<
+ - "variable"_PREFIX = $(addprefix "variable"/, $("variable"))
+ - SRCS = $(prefixes) \
+ - OBJ = $(SRC:.c=.o)
+ - INCLUDES = -Iincl
+ - FLAGS = -Wall -Wextra -Werror
+ - CC = gcc
+ - all: $(NAME)
+ - $(NAME): $(OBJ)
+ - @$(CC) $(FLAGS) $(OBJ) $(INCLUDES) -g -o $(NAME)
+ - %.o: %.c
+		$(CC) $(FLAGS) $(INCLUDES) -g -c $< -o $@
+ - clean:
+		rm -f $(OBJ)
+ - fclean: clean
+		rm -f $(NAME)
+ - re: fclean all
+
+to do
+ - get argument
+ - read dir names
+ - make variables
+ - write to file
