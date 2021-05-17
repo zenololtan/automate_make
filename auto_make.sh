@@ -6,47 +6,9 @@ for ARG in "${@:2}"; do
 	EXCL_DIR+=(${TEMP})
 done
 DIRS=($(ls -d */ | sed 's/\///g' | tr '[:lower:]' '[:upper:]'))
-# CFILES=($(ls | grep *.c))
 
 echo "NAME = ${NAME}" > Makefile
 echo "" >> Makefile
-
-# DIRS=srcs
-# CFILES=($(ls srcs/ | grep \.c))
-
-# PRINT CFILES
-# for i in ${!CFILES[@]}; do
-# 	echo ${CFILES[i]} >> Makefile
-# done
-
-# PRINT EXCL_DIR
-# for i in ${!EXCL_DIR[@]}; do
-# 	echo ${EXCL_DIR[i]} >> Makefile
-# done
-
-# PRINT DIRS
-# for i in ${!DIRS[@]}; do
-# 	echo "${DIRS[i]} = \n" >> Makefile
-# done
-
-# for i in ${!DIRS[@]}; do
-# 	if [[ ! "${EXCL_DIR[@]}" =~ "${DIRS[i]}" ]]; then
-# 		echo -n "${DIRS[i]} = " >> Makefile
-# 		TEMP=$(echo "${DIRS[i]}" | tr '[:upper:]' '[:lower:]')
-# 		CFILES=($(ls ${TEMP} | grep \.c))
-# 		echo "	${CFILES[0]} \\" >> Makefile
-# 		for j in ${!CFILES[@]}; do
-# 			if [[ $j -ne 0 ]]; then
-# 				echo -n "		${CFILES[j]}" >> Makefile
-# 				if [[ ${CFILES[j + 1]} ]]; then
-# 					echo " \\" >> Makefile
-# 				fi
-# 			fi
-# 		done
-# 		echo >> Makefile
-# 		echo >> Makefile
-# 	fi
-# done
 
 for i in ${!DIRS[@]}; do
 	if [[ ! "${EXCL_DIR[@]}" =~ "${DIRS[i]}" ]]; then
@@ -56,7 +18,7 @@ for i in ${!DIRS[@]}; do
 done
 
 for i in ${!DIR_FINAL[@]}; do
-	echo -n "${DIR_FINAL[i]} = " >> Makefile
+	echo -n "${DIR_FINAL[i]} =" >> Makefile
 	CFILES=($(ls ${DIR_FINAL_LOW[i]} | grep \.c))
 	echo "	${CFILES[0]} \\" >> Makefile
 	for j in ${!CFILES[@]}; do
@@ -71,3 +33,44 @@ for i in ${!DIR_FINAL[@]}; do
 	echo >> Makefile
 done
 
+for i in ${!DIR_FINAL[@]}; do
+	DIR_PREFIX+=("${DIR_FINAL[i]}_PREFIX")
+	echo "${DIR_PREFIX[i]} = \$(addprefix ${DIR_FINAL_LOW[i]}/, \$(${DIR_FINAL[i]}))" >> Makefile
+	echo >> Makefile
+done
+
+echo -n "SRC =" >> Makefile
+echo "	\$(${DIR_PREFIX[0]}) \\" >> Makefile
+for i in ${!DIR_PREFIX[@]}; do
+	if [[ $i -ne 0 ]]; then
+		echo -n "		\$(${DIR_PREFIX[i]})" >> Makefile
+		if [[ ${DIR_PREFIX[i + 1]} ]]; then
+			echo " \\" >> Makefile
+		fi
+	fi
+done
+
+echo >> Makefile
+echo >> Makefile
+echo "OBJ = \$(SRC:.c=.o)" >> Makefile
+echo >> Makefile
+echo "FLAGS = -Wall -Wextra -Werror" >> Makefile
+echo >> Makefile
+echo "CC = gcc" >> Makefile
+echo >> Makefile
+echo "all: \$(NAME)" >> Makefile
+echo >> Makefile
+echo "\$(NAME): \$(OBJ)" >> Makefile
+echo "		@\$(CC) \$(FLAGS) \$(OBJ) \$(INCLUDES) -g -o \$(NAME)" >> Makefile
+echo >> Makefile
+echo "%.o: %.c" >> Makefile
+echo "		\$(CC) \$(FLAGS) \$(INCLUDES) -g -c \$< -o \$@" >> Makefile
+echo >> Makefile
+echo "clean:" >> Makefile
+echo "		rm -f \$(OBJ)" >> Makefile
+echo >> Makefile
+echo "fclean: clean" >> Makefile
+echo "		rm -f \$(NAME)" >> Makefile
+echo >> Makefile
+echo "re: fclean all" >> Makefile
+echo >> Makefile
